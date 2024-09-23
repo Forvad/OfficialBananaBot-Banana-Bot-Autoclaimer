@@ -184,8 +184,6 @@ class BananaBot:
                     # await self.go_share(rep_json['data']['banana_id'])
                 await asyncio.sleep(60)
 
-            else:
-                logger.error(f'error: {rep_json}')
         else:
             logger.info('There are no available tickets for claim')
 
