@@ -253,16 +253,16 @@ class BananaBot:
     async def start_quest(self):
         quests = await self.quest_list()
         random.shuffle(quests)
-        for _ in range(2):
-            for num, quest in enumerate(quests):
-                if not quest['is_achieved']:
-                    await self.achieved_quest(quest['quest_id'], quest['description'], num + 1, len(quests))
-                    await asyncio.sleep(random.randint(60, 80))
-                    await self.claim_quest(quest['quest_id'], quest['description'], num + 1, len(quests))
-                    await asyncio.sleep(random.randint(*DELAYS["TASK"]))
-                elif not quest['is_claimed']:
-                    await self.claim_quest(quest['quest_id'], quest['description'], num + 1, len(quests))
-                    await asyncio.sleep(random.randint(*DELAYS["TASK"]))
+        for num, quest in enumerate(quests):
+            if not quest['is_achieved']:
+                await self.achieved_quest(quest['quest_id'], quest['description'], num + 1, len(quests))
+                await asyncio.sleep(random.randint(60, 80))
+                await self.claim_quest(quest['quest_id'], quest['description'], num + 1, len(quests))
+                await asyncio.sleep(random.randint(*DELAYS["TASK"]))
+            elif not quest['is_claimed']:
+                await self.claim_quest(quest['quest_id'], quest['description'], num + 1, len(quests))
+                await asyncio.sleep(random.randint(*DELAYS["TASK"]))
+        return
 
     async def claim_banana_quest(self):
         quest_info = await self.quest_list(True)
