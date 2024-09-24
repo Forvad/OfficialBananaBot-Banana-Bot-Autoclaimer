@@ -1,6 +1,6 @@
-# 🍌 BananaCryptoBot Claimer — Easily automate the entire farming process with @OfficialBananaBot on any number of accounts! 🚀
+# 🍌 BananaCryptoBot Claimer — Easily automate the entire farming process with OfficialBananaBot on any number of accounts! 🚀
 ## 🎁 What You'll Get
-BananaCryptoBot Claimer allows drop hunters to fully automate the farming process in the @OfficialBananaBot tap game on any number of accounts.
+BananaCryptoBot Claimer allows drop hunters to fully automate the farming process in the [@OfficialBananaBot](https://t.me/OfficialBananaBot/banana) tap game on any number of accounts.
 
 ## ⚙️ Script Features:
 
@@ -57,9 +57,9 @@ RU
 
 -------------------
 
-# 🍌 BananaCryptoBot Claimer — легко и просто автоматизируйте весь процесс фарминга @OfficialBananaBot на любом количестве аккаунтов! 🚀
+# 🍌 BananaCryptoBot Claimer — легко и просто автоматизируйте весь процесс фарминга OfficialBananaBot на любом количестве аккаунтов! 🚀
 ## 🎁 Что вы получите
-BananaCryptoBot Claimer позволяет охотникам за дропами полностью автоматизировать процесс фарминга в тапалке @OfficialBananaBot на любом количестве аккаунтов.
+BananaCryptoBot Claimer позволяет охотникам за дропами полностью автоматизировать процесс фарминга в тапалке [@OfficialBananaBot](https://t.me/OfficialBananaBot/banana) на любом количестве аккаунтов.
 
 ## ⚙️ Возможности скрипта:
 
