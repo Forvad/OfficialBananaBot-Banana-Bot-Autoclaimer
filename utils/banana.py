@@ -75,6 +75,7 @@ class BananaBot:
 
     async def login(self):
         self.session.headers.pop('Authorization', None)
+        self.po = "MFPDOK5"
         query = await self.get_tg_web_data()
 
         if query is None:
@@ -82,7 +83,7 @@ class BananaBot:
             await self.logout()
             return None
 
-        json_data = {"tgInfo": query, "InviteCode": "MFPDOK5"}
+        json_data = {"tgInfo": query, "InviteCode": self.po}
 
         # await self.session.options("https://gateway.blum.codes/v1/auth/provider/PROVIDER_TELEGRAM_MINI_APP")
 
@@ -105,7 +106,7 @@ class BananaBot:
     async def get_tg_web_data(self):
         try:
             await self.client.connect()
-
+            do = 'referral='
             if not (await self.client.get_me()).username:
                 while True:
                     username = Faker('en_US').name().replace(" ", "") + '_' + ''.join(random.choices(string.digits, k=random.randint(3, 6)))
@@ -122,7 +123,7 @@ class BananaBot:
                 app=InputBotAppShortName(bot_id=input_user, short_name="banana"),
                 platform='android',
                 write_allowed=True,
-                start_param='referral=MFPDOK5'
+                start_param=do + self.po
             ))
             await self.client.disconnect()
             auth_url = web_view.url
