@@ -209,6 +209,12 @@ class BananaBot:
         await self.get_user_info()
 
     async def claim_lottery(self, type_=1):
+        if type_ == 1:
+            time_ = await self.time_claim()
+            if time_ > 0:
+                return
+            else:
+                await asyncio.sleep(60)
         json = {'claimLotteryType': type_}
         resp = await self.session.post('https://interface.carv.io/banana/claim_lottery', json=json)
         check = await self.check_request(resp)
@@ -304,10 +310,11 @@ class BananaBot:
         if not check:
             return await self.quest_list()
         rep_json = await resp.json()
-        lottery_claim = rep_json['data']['claim_lottery_count']
-        if lottery_claim:
-            await self.claim_lottery(2)
-            logger.success('We took the tickets from the referral system')
+        if rep_json['data']:
+            lottery_claim = rep_json['data']['claim_lottery_count']
+            if lottery_claim:
+                await self.claim_lottery(2)
+                logger.success('We took the tickets from the referral system')
 
     async def go_speed(self, num):
         boost = await self.get_user_info(boost=True)
@@ -319,10 +326,13 @@ class BananaBot:
             await self.session.post(f'https://interface.carv.io/banana/do_speedup', json={})
             await asyncio.sleep(60)
 
-    async def sleep_to_claim(self):
+    async def time_claim(self):
         start_time = await self.get_user_info(time_=True)
         time_ = int(time.time())
-        need_time = 28800 - (time_ - int(start_time / 1000))
+        return 28800 - (time_ - int(start_time / 1000))
+
+    async def sleep_to_claim(self):
+        need_time = await self.time_claim()
         if need_time > 21600:
             boost = 3
         elif need_time > 14400:
