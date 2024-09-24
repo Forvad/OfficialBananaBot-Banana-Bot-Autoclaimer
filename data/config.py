@@ -4,6 +4,7 @@ API_HASH = 'abcde1488'
 
 
 ADD_TASK = []
+# example: ["TASK", "CLICK_BANANA"]
 # "TASK" - Complete tasks and collect tickets for every 3 tasks
 # "CLAIM_TICKET" -Collect a ticket every 8 hours
 # "CLAIM_REFF" - Collect a ticket for referrals
