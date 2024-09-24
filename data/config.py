@@ -3,12 +3,12 @@ API_ID = 1488
 API_HASH = 'abcde1488'
 
 
-ADD_TASK = [] #['TASK', 'CLAIM_TICKET', 'CLAIM_BANANA', 'CLICK_BANANA']
-# TASK - Complete tasks and collect tickets for every 3 tasks
-# CLAIM_TICKET -Collect a ticket every 8 hours
-# CLAIM_REFF - Collect a ticket for referrals
-# CLAIM_BANANA - Unpacking tickets in BANANA
-# CLICK_BANANA - Clicking points
+ADD_TASK = []
+# "TASK" - Complete tasks and collect tickets for every 3 tasks
+# "CLAIM_TICKET" -Collect a ticket every 8 hours
+# "CLAIM_REFF" - Collect a ticket for referrals
+# "CLAIM_BANANA" - Unpacking tickets in BANANA
+# "CLICK_BANANA" - Clicking points
 
 WHILE = True  # True / False (constant turning on and off of the work cycle)
 
