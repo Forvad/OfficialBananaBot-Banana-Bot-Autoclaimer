@@ -27,26 +27,16 @@ class Accounts:
     def get_available_accounts(sessions: list):
         available_accounts = []
 
-        if config.PROXY['USE_PROXY_FROM_FILE']:
-            proxys = get_all_lines(config.PROXY['PROXY_PATH'])
-            for session in sessions:
-                available_accounts.append({
-                    'session_name': session,
-                    'phone_number': '+0',
-                    'proxy': proxys.pop(proxys.index(random.choice(proxys))) if proxys else None
-                })
+        accounts_from_json = load_from_json('sessions/accounts.json')
 
-        else:
-            accounts_from_json = load_from_json('sessions/accounts.json')
+        if not accounts_from_json:
+            raise ValueError("Have not account's in sessions/accounts.json")
 
-            if not accounts_from_json:
-                raise ValueError("Have not account's in sessions/accounts.json")
-
-            for session in sessions:
-                for saved_account in accounts_from_json:
-                    if saved_account['session_name'] == session:
-                        available_accounts.append(saved_account)
-                        break
+        for session in sessions:
+            for saved_account in accounts_from_json:
+                if saved_account['session_name'] == session:
+                    available_accounts.append(saved_account)
+                    break
 
         return available_accounts
 

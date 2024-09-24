@@ -1,6 +1,6 @@
 import random
 
-from data.config import DELAYS
+from data.config import DELAYS, WHILE
 from utils.banana import BananaBot
 from asyncio import sleep
 from random import uniform
@@ -19,38 +19,56 @@ async def start(thread: int, session_name: str, phone_number: str, proxy: [str, 
     account = session_name + '.session'
 
     await sleep(uniform(*config.DELAYS['ACCOUNT']))
-
-    attempts = 3
-    while attempts:
-        try:
-            await banana.login()
-            logger.success(f"Thread {thread} | {account} | Login")
-            break
-        except Exception as e:
-            logger.error(f"Thread {thread} | {account} | Left login attempts: {attempts}, error: {e}")
-            await asyncio.sleep(uniform(*config.DELAYS['RELOGIN']))
-            attempts -= 1
+    if WHILE:
+        num = 999
     else:
-        logger.error(f"Thread {thread} | {account} | Couldn't login")
-        await banana.logout()
-        return
+        num = 1
+    for _ in range(num):
 
-    # while True:
-    try:
-        await asyncio.sleep(5)
-        if await banana.login() is None:
+        attempts = 3
+        while attempts:
+            try:
+                await banana.login()
+                logger.success(f"Thread {thread} | {account} | Login")
+                break
+            except Exception as e:
+                logger.error(f"Thread {thread} | {account} | Left login attempts: {attempts}, error: {e}")
+                await asyncio.sleep(uniform(*config.DELAYS['RELOGIN']))
+                attempts -= 1
+        else:
+            logger.error(f"Thread {thread} | {account} | Couldn't login")
+            await banana.logout()
             return
-        func_all = [banana.start_quest, banana.claim_banana_quest, banana.claim_lottery, banana.claim_banana,
-                banana.click, banana.logout]
-        for func in func_all:
-            await func()
-            await sleep(random.randint(*DELAYS["FUNC"]))
-    except ContentTypeError as e:
-        logger.error(f"Thread {thread} | {account} | Error: {e}")
-        await asyncio.sleep(120)
 
-    except Exception as e:
-        logger.error(f"Thread {thread} | {account} | Error: {e}")
+        # while True:
+        try:
+            await asyncio.sleep(5)
+            if await banana.login() is None:
+                return
+            func_all = {'TASK': [banana.start_quest, banana.claim_banana_quest],
+                        'CLAIM_TICKET': banana.claim_lottery,
+                        'CLAIM_REFF': banana.claim_ref,
+                        'CLAIM_BANANA': banana.claim_banana,
+                        'CLICK_BANANA': banana.click
+                        }
+            for func in config.ADD_TASK:
+                if isinstance(func_all[func], list):
+                    for i in func_all[func]:
+                        await i()
+                        await sleep(random.randint(*DELAYS["FUNC"]))
+                else:
+                    await func_all[func]()
+                await sleep(random.randint(*DELAYS["FUNC"]))
+            if WHILE:
+                await banana.sleep_to_claim()
+                await func_all['CLAIM_BANANA']()
+            await banana.logout()
+        except ContentTypeError as e:
+            logger.error(f"Thread {thread} | {account} | Error: {e}")
+            await asyncio.sleep(120)
+
+        except Exception as e:
+            logger.error(f"Thread {thread} | {account} | Error: {e}")
 
 
 async def stats():

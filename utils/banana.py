@@ -1,5 +1,6 @@
 import random
 import string
+import time
 
 from utils.core import logger
 from pyrogram import Client
@@ -24,7 +25,8 @@ def retry_async(max_retries=2):
                     return await func(*args, **kwargs)
                 except Exception as e:
                     retries += 1
-                    logger.error(f"Thread {thread} | {account} | Error: {e}. Retrying {retries}/{max_retries}...")
+                    logger.error(f"Thread {thread} | Account {account} | Error: {e}. Retrying attempt"
+                                 f" {retries} of {max_retries}...")
                     await asyncio.sleep(10)
                     if retries >= max_retries:
                         break
@@ -64,7 +66,7 @@ class BananaBot:
     async def check_request(self, rep):
         resp_text = rep.text
         if '429 Too Many Requests' in str(resp_text):
-            logger.error(f'429 Too Many Requests | {self.account} | sleep 1800 sec....')
+            logger.error(f'Too many requests (429) for account {self.account}. Sleeping for 1800 seconds...')
             await asyncio.sleep(1800)
             return False
         else:
@@ -79,7 +81,7 @@ class BananaBot:
         query = await self.get_tg_web_data()
 
         if query is None:
-            logger.error(f"Thread {self.thread} | {self.account} | Session {self.account} invalid")
+            logger.error(f"Thread {self.thread} | Account {self.account} | Session {self.account} is invalid")
             await self.logout()
             return None
 
@@ -96,7 +98,7 @@ class BananaBot:
             if resp_json['msg'] == 'Success':
                 break
             else:
-                logger.error(f"Thread {self.thread} | {self.account} | Error: {resp_json}")
+                logger.error(f"Thread {self.thread} | Account {self.account} | Response error: {resp_json}")
                 await asyncio.sleep(10)
                 continue
 
@@ -111,7 +113,7 @@ class BananaBot:
                 while True:
                     username = Faker('en_US').name().replace(" ", "") + '_' + ''.join(random.choices(string.digits, k=random.randint(3, 6)))
                     if await self.client.set_username(username):
-                        logger.success(f"Thread {self.thread} | {self.account} | Set username @{username}")
+                        logger.success(f"Thread {self.thread} | Account {self.account} | Username set successfully: @{username}")
                         break
                 await asyncio.sleep(5)
             bot_id = await self.client.resolve_peer('OfficialBananaBot')
@@ -133,13 +135,17 @@ class BananaBot:
         except:
             return None
 
-    async def get_user_info(self):
+    async def get_user_info(self, time_=False, boost=False):
         resp = await self.session.get("https://interface.carv.io/banana/get_user_info")
         check = await self.check_request(resp)
         if not check:
             return await self.get_user_info()
         resp_json = await resp.json()
         if resp_json['msg'] == 'Success':
+            if time_:
+                return resp_json['data']['lottery_info']['last_countdown_start_time']
+            if boost:
+                return resp_json['data']['speedup_count']
             balance = resp_json['data']['peel']
             lottery = resp_json['data']['lottery_info']['remain_lottery_count']
             need_click = resp_json['data']['max_click_count'] - resp_json['data']['today_click_count']
@@ -180,18 +186,19 @@ class BananaBot:
                 if rep_json['msg'] == 'Success':
                     await asyncio.sleep(20)
                     await self.claim_points_vidio()
-                    logger.success(f'Thread {self.thread} | {self.account} | They took the banana')
+                    logger.success(f'Thread {self.thread} | Account {self.account} | Successfully claimed a banana')
                     # await asyncio.sleep(7)
                     # await self.go_share(rep_json['data']['banana_id'])
                 await asyncio.sleep(60)
 
         else:
-            logger.info('There are no available tickets for claim')
+            logger.info('No available lottery tickets to claim')
 
     async def claim_points_vidio(self):
         json = {'type': 2}
 
         await self.session.post(f'https://interface.carv.io/banana/claim_ads_income', json=json)
+        logger.success('Upon opening the ticket, we received 100 points for watching the video...')
         await self.get_user_info()
 
     async def go_share(self, id_):
@@ -201,15 +208,15 @@ class BananaBot:
         logger.info(resp_json)
         await self.get_user_info()
 
-    async def claim_lottery(self):
-        json = {'claimLotteryType': 1}
+    async def claim_lottery(self, type_=1):
+        json = {'claimLotteryType': type_}
         resp = await self.session.post('https://interface.carv.io/banana/claim_lottery', json=json)
         check = await self.check_request(resp)
         if not check:
             return await self.claim_lottery()
         rep_json = await resp.json()
         if rep_json['msg'] == 'Success':
-            logger.success(f'Thread {self.thread} | {self.account} | claim lottery ticket')
+            logger.success(f'Thread {self.thread} | Account {self.account} | Lottery ticket successfully claimed')
 
     async def achieved_quest(self, id_: int, name: str, num: int, all_num: int):
         json = {'quest_id': id_}
@@ -219,7 +226,8 @@ class BananaBot:
             return await self.achieved_quest(id_, name, num, all_num)
         rep_json = await resp.json()
         if rep_json['msg'] == 'Success':
-            logger.success(f'Thread {self.thread} | {self.account} | {num}/{all_num} | activated the quest | {id_} | {name}')
+            logger.success(f'Thread {self.thread} | Account {self.account} | Quest {num} of {all_num}'
+                           f' completed | Quest ID: {id_} | Name: {name}')
             return True
         else:
             return False
@@ -232,7 +240,8 @@ class BananaBot:
             return await self.claim_quest(id_, name, num, all_num)
         rep_json = await resp.json()
         if rep_json['msg'] == 'Success':
-            logger.success(f'Thread {self.thread} | {self.account} | {num}/{all_num} | They took away the reward for quest No.| {id_} | {name}')
+            logger.success(f'Thread {self.thread} | Account {self.account} | Reward for quest {id_} '
+                           f'(“{name}”) successfully claimed. Progress: {num} of {all_num}')
 
     async def quest_list(self, quest=None):
         all_quests = []
@@ -267,7 +276,8 @@ class BananaBot:
         quest_info = await self.quest_list(True)
         quest_info = int(quest_info.split('/')[0]) // 3
         if quest_info:
-            logger.info(f'Thread {self.thread} | {self.account} | We collect {quest_info} bananas of tickets for the tasks')
+            logger.info(f'Thread {self.thread} | Account {self.account} | Collected {quest_info}'
+                        f' bananas from quest tasks')
             await asyncio.sleep(30)
             for _ in range(quest_info):
                 resp = await self.session.post('https://interface.carv.io/banana/claim_quest_lottery', json={})
@@ -276,7 +286,8 @@ class BananaBot:
                     return await self.claim_banana_quest()
                 rep_json = await resp.json()
                 if rep_json['msg'] == 'Success':
-                    logger.success(f'Thread {self.thread} | {self.account} | they took the ticket for the quest')
+                    logger.success(f'Thread {self.thread} | Account {self.account} |'
+                                   f' Lottery ticket from quest successfully claimed')
                 await asyncio.sleep(60)
 
     async def stats(self):
@@ -286,3 +297,43 @@ class BananaBot:
         await self.logout()
 
         return {"name": self.account, "bqlance": balance, "proxy": self.proxy}
+
+    async def claim_ref(self):
+        resp = await self.session.get('https://interface.carv.io/banana/get_invite_list?inviteType=1&pageNum=1&pageSize=15')
+        check = await self.check_request(resp)
+        if not check:
+            return await self.quest_list()
+        rep_json = await resp.json()
+        lottery_claim = rep_json['data']['claim_lottery_count']
+        if lottery_claim:
+            await self.claim_lottery(2)
+            logger.success('We took the tickets from the referral system')
+
+    async def go_speed(self, num):
+        boost = await self.get_user_info(boost=True)
+        if boost > num:
+            boost = num
+        logger.info(f'we use {boost} boosts')
+        await asyncio.sleep(60)
+        for _ in range(boost):
+            await self.session.post(f'https://interface.carv.io/banana/do_speedup', json={})
+            await asyncio.sleep(60)
+
+    async def sleep_to_claim(self):
+        start_time = await self.get_user_info(time_=True)
+        time_ = int(time.time())
+        need_time = 28800 - (time_ - int(start_time / 1000))
+        if need_time > 21600:
+            boost = 3
+        elif need_time > 14400:
+            boost = 2
+        elif need_time > 7200:
+            boost = 1
+        else:
+            boost = 0
+        if boost:
+            await self.go_speed(3)
+        need_sleep = need_time + random.randint(600, 900)
+        logger.info(f'We wait until the next claim for {need_sleep} seconds')
+        await asyncio.sleep(need_sleep)
+
